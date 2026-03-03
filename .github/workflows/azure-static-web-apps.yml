@@ -50,10 +50,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: 'upload'
-          app_location: '/'          # root → Vite build
-          api_location: 'api'        # Azure Functions (pre-built dist/ aanwezig)
-          output_location: 'dist'    # Vite output directory
-          api_build_command: 'echo "API pre-built, skipping TypeScript compilation"'
+          app_location: '/'              # root → Vite build
+          api_location: 'api-minimal'    # TIJDELIJK: minimale test-API
+          output_location: 'dist'        # Vite output directory
+          api_build_command: 'echo "Minimal API, no build needed"'
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
