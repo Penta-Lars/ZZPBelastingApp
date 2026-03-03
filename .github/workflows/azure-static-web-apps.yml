@@ -37,6 +37,13 @@ jobs:
         working-directory: ./api
         run: npm run build
 
+      - name: Prepare API voor deployment (verwijder TypeScript-specific files)
+        run: |
+          # Verwijder TypeScript bronbestanden zodat oryx de API als Node.js detecteert
+          rm -f api/tsconfig.json
+          rm -rf api/src/
+          rm -rf api/__tests__/
+
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -44,9 +51,9 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: 'upload'
           app_location: '/'          # root → Vite build
-          api_location: 'api'        # Azure Functions
+          api_location: 'api'        # Azure Functions (pre-built dist/ aanwezig)
           output_location: 'dist'    # Vite output directory
-          skip_api_build: 'true'     # API al gebouwd in vorige stap (runtime: node:20 in staticwebapp.config.json)
+          api_build_command: 'echo "API pre-built, skipping TypeScript compilation"'
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
