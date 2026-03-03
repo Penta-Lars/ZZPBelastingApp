@@ -33,6 +33,10 @@ jobs:
           npm ci
           npm test -- --no-coverage
 
+      - name: Build API (TypeScript → dist/)
+        working-directory: ./api
+        run: npm run build
+
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
@@ -42,6 +46,7 @@ jobs:
           app_location: '/'          # root → Vite build
           api_location: 'api'        # Azure Functions
           output_location: 'dist'    # Vite output directory
+          skip_api_build: 'true'     # API al gebouwd in vorige stap
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
