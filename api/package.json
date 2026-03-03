@@ -2,7 +2,7 @@
   "name": "musici-belasting-api",
   "version": "1.0.0",
   "description": "Azure Functions API voor ZZP Musici Belasting App",
-  "main": "dist/api/src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
