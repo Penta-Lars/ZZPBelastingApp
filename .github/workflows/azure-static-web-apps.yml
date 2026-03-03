@@ -47,6 +47,8 @@ jobs:
           api_location: 'api'        # Azure Functions
           output_location: 'dist'    # Vite output directory
           skip_api_build: 'true'     # API al gebouwd in vorige stap
+          api_language: 'node'       # Expliciet Node.js runtime
+          api_version: '20'          # Node.js 20
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
