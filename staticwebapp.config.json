@@ -1,5 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/staticwebapp.config.json",
+  "platform": {
+    "apiRuntime": "node:20"
+  },
   "auth": {
     "identityProviders": {
       "azureActiveDirectory": {
