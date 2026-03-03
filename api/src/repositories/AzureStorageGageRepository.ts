@@ -17,9 +17,7 @@ export class AzureStorageGageRepository implements IGageRepository {
 
   private async ensureContainer(): Promise<void> {
     const containerClient = this.blobServiceClient.getContainerClient(this.containerName);
-    await containerClient.createIfNotExists({
-      access: 'private',
-    });
+    await containerClient.createIfNotExists(); // no public access (default = private)
   }
 
   async saveEntry(userId: string, entry: SaveGageEntryRequest): Promise<GageEntry> {
@@ -29,8 +27,13 @@ export class AzureStorageGageRepository implements IGageRepository {
     const now = new Date().toISOString();
 
     // Calculate VAT amounts based on rate
-    const vatRate = entry.vatRate === 'performance' ? 0.09 : 0.21;
-    const amountExcludingVAT = entry.amountIncludingVAT / (1 + vatRate);
+    const vatRate =
+      entry.vatRate === 'performance' ? 0.09 :
+      entry.vatRate === 'standard'    ? 0.21 :
+      0; // 'exempt' = 0%
+    const amountExcludingVAT = vatRate > 0
+      ? entry.amountIncludingVAT / (1 + vatRate)
+      : entry.amountIncludingVAT;
     const vatAmount = entry.amountIncludingVAT - amountExcludingVAT;
 
     const gageEntry: GageEntry = {
@@ -45,6 +48,7 @@ export class AzureStorageGageRepository implements IGageRepository {
         vatAmount: parseFloat(vatAmount.toFixed(2)),
         vatRate: entry.vatRate,
       },
+      isForeignIncome: entry.isForeignIncome ?? false,
       createdAt: now,
       updatedAt: now,
     };

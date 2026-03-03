@@ -1,10 +1,9 @@
 import React, { useState, useMemo } from 'react';
-
-type VATRate = 'standard' | 'performance';
+import { DUTCH_MUSICIAN_VAT_RATES, type VATRateType } from '../types/gage.types';
 
 interface GageCalculatorState {
   amountIncludingVAT: string;
-  vatRate: VATRate;
+  vatRate: VATRateType;
 }
 
 export const GageCalculator: React.FC = () => {
@@ -12,12 +11,6 @@ export const GageCalculator: React.FC = () => {
     amountIncludingVAT: '',
     vatRate: 'performance', // Default to 9% for performances
   });
-
-  // VAT percentages according to sector rules
-  const vatPercentages = {
-    performance: 0.09, // 9% for performances/gigs
-    standard: 0.21,   // 21% for other services
-  };
 
   // Calculate exclusiveAmount and VAT amount
   const calculations = useMemo(() => {
@@ -31,7 +24,9 @@ export const GageCalculator: React.FC = () => {
       };
     }
 
-    const vatRate = vatPercentages[state.vatRate];
+    const vatRate = state.vatRate === 'performance'
+      ? DUTCH_MUSICIAN_VAT_RATES.performanceVATRate
+      : DUTCH_MUSICIAN_VAT_RATES.standardVATRate;
     const amountExcludingVAT = amount / (1 + vatRate);
     const vatAmount = amount - amountExcludingVAT;
 
@@ -49,14 +44,16 @@ export const GageCalculator: React.FC = () => {
     }));
   };
 
-  const handleVATRateChange = (newRate: VATRate) => {
+  const handleVATRateChange = (newRate: VATRateType) => {
     setState(prev => ({
       ...prev,
       vatRate: newRate,
     }));
   };
 
-  const currentVATPercentage = vatPercentages[state.vatRate] * 100;
+  const currentVATPercentage = (state.vatRate === 'performance'
+    ? DUTCH_MUSICIAN_VAT_RATES.performanceVATRate
+    : DUTCH_MUSICIAN_VAT_RATES.standardVATRate) * 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-8">
