@@ -22,20 +22,22 @@ export type IncomeCategory =
 // Open string type zodat gebruikers eigen categorieën kunnen toevoegen
 export type ExpenseCategory = string;
 
-/** Standaard categorieën (overeenkomen met Excel-rubrieken Belastingdienst) */
+/** Standaard categorieën (exacte rubrieken conform Belastingdienst-indeling) */
 export const DEFAULT_EXPENSE_CATEGORIES: { value: string; label: string; isDepreciable?: boolean }[] = [
-  { value: 'Sejour',                           label: '🍽️ Sejour / eten & drinken' },
-  { value: 'Reiskosten',                       label: '🚗 Reiskosten' },
-  { value: 'Werkkleding',                      label: '👔 Werkkleding / concertkleding' },
-  { value: 'Instrumenten',                     label: '🎻 Instrumenten & apparatuur (≤€450)' },
-  { value: 'Instrumenten afschrijven',         label: '🎸 Instrumenten & apparatuur (>€450, afschrijven)', isDepreciable: true },
-  { value: 'Huur ruimte',                      label: '🏠 Huur ruimte of instrument' },
-  { value: 'Accountantskosten',                label: '🧾 Accountantskosten' },
-  { value: 'Contributies',                     label: '📋 Contributies & abonnementen' },
-  { value: 'Marketing',                        label: '📣 Marketing & advertenties' },
-  { value: 'Vakliteratuur',                    label: '📚 Vakliteratuur' },
-  { value: 'Kantoorkosten',                    label: '🖥️ Kantoorkosten' },
-  { value: 'Overig',                           label: '📎 Overig' },
+  { value: 'Sejour (eten en drinken)',                    label: '🍽️ Sejour (eten en drinken)' },
+  { value: 'Telefoonkosten en internet',                  label: '📱 Telefoonkosten en internet' },
+  { value: 'Contributies en abonnementen',                label: '📋 Contributies en abonnementen' },
+  { value: 'Werkkleding',                                 label: '👔 Werkkleding' },
+  { value: 'Accountantskosten',                           label: '🧾 Accountantskosten' },
+  { value: 'Persoonlijke verzorging (kapper) (artiesten)', label: '✂️ Persoonlijke verzorging (kapper)' },
+  { value: 'Kantoorkosten',                               label: '🖥️ Kantoorkosten' },
+  { value: 'Overige reis- en verblijfkosten',             label: '🚗 Overige reis- en verblijfkosten' },
+  { value: 'Studiekosten en vakliteratuur',               label: '📚 Studiekosten en vakliteratuur' },
+  { value: 'Representatiekosten en relatiegeschenken',    label: '🎁 Representatiekosten en relatiegeschenken' },
+  { value: 'Verzekeringen',                               label: '🛡️ Verzekeringen' },
+  { value: 'Kosten instrumenten <€ 450 ex btw',           label: '🎻 Kosten instrumenten (< €450 ex btw)' },
+  { value: 'Kosten instrumenten >€ 450 ex btw',          label: '🎸 Kosten instrumenten (> €450, afschrijven)', isDepreciable: true },
+  { value: 'Overig',                                      label: '📎 Overig' },
 ];
 
 // Backwards compat – gebruikt als GageCategory
