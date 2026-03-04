@@ -93,34 +93,34 @@ export const ExpenseList: React.FC<{ refresh?: number }> = ({ refresh }) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="w-full text-sm" style={{ minWidth: '640px' }}>
         <thead>
           <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
-            <th className="text-left py-2 pr-4">Datum</th>
+            <th className="text-left py-2 pr-4 whitespace-nowrap">Datum</th>
             <th className="text-left py-2 pr-4">Omschrijving</th>
             <th className="text-left py-2 pr-4">Categorie</th>
-            <th className="text-right py-2 pr-4">Excl. BTW</th>
-            <th className="text-right py-2 pr-4">Voorbelasting</th>
-            <th className="text-right py-2">Activering</th>
+            <th className="text-right py-2 pr-4 whitespace-nowrap">Excl. BTW</th>
+            <th className="text-right py-2 pr-4 whitespace-nowrap">Voorbelasting</th>
+            <th className="text-right py-2 whitespace-nowrap">Activering</th>
           </tr>
         </thead>
         <tbody>
           {data.map(e => (
             <tr key={e.id} className="border-b border-slate-100 hover:bg-slate-50">
-              <td className="py-2 pr-4 text-slate-600">{new Date(e.date).toLocaleDateString('nl-NL')}</td>
+              <td className="py-2 pr-4 text-slate-600 whitespace-nowrap">{new Date(e.date).toLocaleDateString('nl-NL')}</td>
               <td className="py-2 pr-4 text-slate-800 font-medium">{e.description}</td>
               <td className="py-2 pr-4">
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
                   {e.category}
                 </span>
               </td>
-              <td className="py-2 pr-4 text-right text-red-600 font-semibold">
+              <td className="py-2 pr-4 text-right text-red-600 font-semibold whitespace-nowrap">
                 − € {e.amountExcludingVAT.toFixed(2)}
               </td>
-              <td className="py-2 pr-4 text-right text-orange-500 font-semibold">
+              <td className="py-2 pr-4 text-right text-orange-500 font-semibold whitespace-nowrap">
                 € {e.vatAmount.toFixed(2)}
               </td>
-              <td className="py-2 text-right">
+              <td className="py-2 text-right whitespace-nowrap">
                 {e.isDepreciableAsset ? (
                   <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
                     Actief ({e.usefulLifeYears}jr)

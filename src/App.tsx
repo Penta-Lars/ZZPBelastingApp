@@ -44,7 +44,7 @@ export const App: React.FC = () => {
 
         {/* ── Bonnetjes ────────────────────────────────────────────────── */}
         {tab === 'bonnetjes' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="flex flex-col gap-8">
             <ExpenseForm onSaved={() => setExpenseRefresh(r => r + 1)} />
             <div className="bg-white rounded-2xl shadow-md p-6">
               <h2 className="text-lg font-bold text-slate-800 mb-4">🧾 Ingevoerde Uitgaven</h2>
