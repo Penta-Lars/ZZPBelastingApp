@@ -19,16 +19,24 @@ export type IncomeCategory =
   | 'Overig';
 
 // ─── Categorieën Uitgaven ─────────────────────────────────────────────────────
-export type ExpenseCategory =
-  | 'Instrumenten'
-  | 'Studio'
-  | 'Reiskosten'
-  | 'Bladmuziek'
-  | 'Concertkleding'
-  | 'Vakliteratuur'
-  | 'Marketing'
-  | 'Kantoorkosten'
-  | 'Overig';
+// Open string type zodat gebruikers eigen categorieën kunnen toevoegen
+export type ExpenseCategory = string;
+
+/** Standaard categorieën (overeenkomen met Excel-rubrieken Belastingdienst) */
+export const DEFAULT_EXPENSE_CATEGORIES: { value: string; label: string; isDepreciable?: boolean }[] = [
+  { value: 'Sejour',                           label: '🍽️ Sejour / eten & drinken' },
+  { value: 'Reiskosten',                       label: '🚗 Reiskosten' },
+  { value: 'Werkkleding',                      label: '👔 Werkkleding / concertkleding' },
+  { value: 'Instrumenten',                     label: '🎻 Instrumenten & apparatuur (≤€450)' },
+  { value: 'Instrumenten afschrijven',         label: '🎸 Instrumenten & apparatuur (>€450, afschrijven)', isDepreciable: true },
+  { value: 'Huur ruimte',                      label: '🏠 Huur ruimte of instrument' },
+  { value: 'Accountantskosten',                label: '🧾 Accountantskosten' },
+  { value: 'Contributies',                     label: '📋 Contributies & abonnementen' },
+  { value: 'Marketing',                        label: '📣 Marketing & advertenties' },
+  { value: 'Vakliteratuur',                    label: '📚 Vakliteratuur' },
+  { value: 'Kantoorkosten',                    label: '🖥️ Kantoorkosten' },
+  { value: 'Overig',                           label: '📎 Overig' },
+];
 
 // Backwards compat – gebruikt als GageCategory
 export type GageCategory = IncomeCategory | ExpenseCategory;
@@ -93,7 +101,7 @@ export interface ExpenseEntry {
   userId: string;
   date: string;
   description: string;
-  category: ExpenseCategory;
+  category: string;
   amountIncludingVAT: number;
   amountExcludingVAT: number;
   /** BTW op inkoop (voor rubriek 5b voorbelasting) */
@@ -110,7 +118,7 @@ export interface ExpenseEntry {
 export interface SaveExpenseRequest {
   date: string;
   description: string;
-  category: ExpenseCategory;
+  category: string;
   amountIncludingVAT: number;
   vatRateOnExpense: VATRateType;
   isDepreciableAsset: boolean;

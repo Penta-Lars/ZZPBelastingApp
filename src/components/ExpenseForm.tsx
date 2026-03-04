@@ -1,19 +1,8 @@
 import React, { useState } from 'react';
-import type { SaveExpenseRequest, ExpenseCategory, VATRateType } from '../types/gage.types';
+import type { SaveExpenseRequest, VATRateType } from '../types/gage.types';
 import { IB_CONSTANTS_2025 } from '../types/gage.types';
 import { useApi } from '../hooks/useApi';
-
-const EXPENSE_CATEGORIES: { value: ExpenseCategory; label: string }[] = [
-  { value: 'Instrumenten',   label: '🎻 Instrumenten / apparatuur' },
-  { value: 'Studio',         label: '🎙️ Studio / opname' },
-  { value: 'Reiskosten',     label: '🚗 Reiskosten' },
-  { value: 'Bladmuziek',     label: '🎼 Bladmuziek / noten' },
-  { value: 'Concertkleding', label: '👔 Concertkleding' },
-  { value: 'Vakliteratuur',  label: '📚 Vakliteratuur' },
-  { value: 'Marketing',      label: '📣 Marketing / website' },
-  { value: 'Kantoorkosten',  label: '🖥️ Kantoorkosten' },
-  { value: 'Overig',         label: '📋 Overig' },
-];
+import { useCategories } from '../hooks/useCategories';
 
 const VAT_RATES: { value: VATRateType; label: string }[] = [
   { value: 'standard',    label: '21% – standaard' },
@@ -27,7 +16,10 @@ interface Props {
 
 export const ExpenseForm: React.FC<Props> = ({ onSaved }) => {
   const { loading, error, execute } = useApi<unknown>();
+  const { allCategories, addCategory } = useCategories();
   const [saved, setSaved] = useState(false);
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
 
   const [form, setForm] = useState<SaveExpenseRequest>({
     date: new Date().toISOString().split('T')[0],
@@ -99,14 +91,68 @@ export const ExpenseForm: React.FC<Props> = ({ onSaved }) => {
         {/* Categorie */}
         <div>
           <label className="block text-xs font-semibold text-slate-600 mb-1">Categorie</label>
-          <select value={form.category}
-            onChange={e => setForm(prev => ({ ...prev, category: e.target.value as ExpenseCategory }))}
+          <select
+            value={showNewCat ? '__new__' : form.category}
+            onChange={e => {
+              if (e.target.value === '__new__') {
+                setShowNewCat(true);
+                setNewCatName('');
+              } else {
+                setShowNewCat(false);
+                setForm(prev => ({ ...prev, category: e.target.value }));
+              }
+            }}
             className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
-            {EXPENSE_CATEGORIES.map(c => (
+            {allCategories.map(c => (
               <option key={c.value} value={c.value}>{c.label}</option>
             ))}
+            <option value="__new__">＋ Nieuwe categorie toevoegen…</option>
           </select>
+
+          {showNewCat && (
+            <div className="mt-2 flex gap-2">
+              <input
+                autoFocus
+                type="text"
+                placeholder="Naam nieuwe categorie"
+                value={newCatName}
+                onChange={e => setNewCatName(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const ok = addCategory(newCatName);
+                    if (ok) {
+                      setForm(prev => ({ ...prev, category: newCatName.trim() }));
+                      setShowNewCat(false);
+                    }
+                  }
+                  if (e.key === 'Escape') { setShowNewCat(false); }
+                }}
+                className="flex-1 border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const ok = addCategory(newCatName);
+                  if (ok) {
+                    setForm(prev => ({ ...prev, category: newCatName.trim() }));
+                    setShowNewCat(false);
+                  }
+                }}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg"
+              >
+                Toevoegen
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowNewCat(false)}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm rounded-lg"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Bedrag */}
