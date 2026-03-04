@@ -21,3 +21,8 @@ Thumbs.db
 local.settings.json
 .azure/
 .azurite/
+
+# Persoonlijke financiële gegevens
+2025/
+*.xlsx
+*.xls
