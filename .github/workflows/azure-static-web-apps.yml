@@ -1,4 +1,4 @@
-name: Deploy to Azure Static Web Apps
+name: Deploy to Azure
 
 on:
   push:
@@ -15,51 +15,54 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
+      # ── Frontend ────────────────────────────────────────────────────────
       - name: Install frontend dependencies
+        run: npm ci
+
+      # ── API ─────────────────────────────────────────────────────────────
+      - name: Install API dependencies
+        working-directory: ./api
         run: npm ci
 
       - name: Run API tests
         working-directory: ./api
-        run: |
-          npm ci
-          npm test -- --no-coverage
+        run: npm test -- --no-coverage
 
       - name: Build API (TypeScript → dist/)
         working-directory: ./api
         run: npm run build
 
-      - name: Prepare API voor deployment (verwijder TypeScript-specific files)
-        run: |
-          # Verwijder TypeScript bronbestanden zodat oryx de API als Node.js detecteert
-          rm -f api/tsconfig.json
-          rm -rf api/src/
-          rm -rf api/__tests__/
-
-      - name: Deploy to Azure Static Web Apps
+      # ── Deploy frontend naar Azure Static Web Apps ──────────────────────
+      - name: Deploy frontend naar SWA
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: 'upload'
-          app_location: '/'              # root → Vite build
-          api_location: 'api-minimal'    # TIJDELIJK: minimale test-API
-          output_location: 'dist'        # Vite output directory
-          api_build_command: 'echo "Minimal API, no build needed"'
+          app_location: '/'        # Vite build
+          output_location: 'dist'  # Vite output
+          skip_api_build: 'true'   # API staat in eigen Function App
+
+      # ── Deploy API naar standalone Azure Functions ───────────────────────
+      - name: Deploy API naar Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: 'func-musici-belasting'
+          package: './api'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close PR Environment
-
     steps:
       - name: Close staging environment
         uses: Azure/static-web-apps-deploy@v1

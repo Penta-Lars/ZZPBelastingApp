@@ -1,5 +1,8 @@
-# Build outputs (dist/ is excluded from git, pre-built in CI before deployment)
+# Build outputs
+dist/
 build/
+*.js
+*.js.map
 
 # Dependencies
 node_modules/
