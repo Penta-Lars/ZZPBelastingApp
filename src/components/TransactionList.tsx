@@ -30,43 +30,34 @@ export const InvoiceList: React.FC<{ refresh?: number; onEdit?: (entry: GageEntr
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-[680px] w-full text-sm table-fixed">
-        <colgroup>
-          <col className="w-32" />
-          <col className="w-28" />
-          <col />
-          <col className="w-28" />
-          <col className="w-16" />
-          <col className="w-28" />
-          <col className="w-20" />
-        </colgroup>
+      <table className="w-full text-sm" style={{ minWidth: '700px' }}>
         <thead>
           <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
-            <th className="text-left py-2 pr-3">Fact.nr</th>
-            <th className="text-left py-2 pr-3">Datum</th>
-            <th className="text-left py-2 pr-3">Opdrachtgever</th>
-            <th className="text-right py-2 pr-3">Excl. BTW</th>
-            <th className="text-right py-2 pr-3">BTW%</th>
-            <th className="text-right py-2 pr-3">Incl. BTW</th>
+            <th className="text-left py-2 pr-4 whitespace-nowrap">Fact.nr</th>
+            <th className="text-left py-2 pr-4 whitespace-nowrap">Datum</th>
+            <th className="text-left py-2 pr-4">Opdrachtgever</th>
+            <th className="text-right py-2 pr-4 whitespace-nowrap">Excl. BTW</th>
+            <th className="text-right py-2 pr-4 whitespace-nowrap">BTW%</th>
+            <th className="text-right py-2 pr-4 whitespace-nowrap">Incl. BTW</th>
             <th className="py-2"></th>
           </tr>
         </thead>
         <tbody>
           {data.map(e => (
             <tr key={e.id} className="border-b border-slate-100 hover:bg-slate-50">
-              <td className="py-2 pr-3 text-slate-500 text-xs font-mono truncate">{e.invoiceNumber ?? '—'}</td>
-              <td className="py-2 pr-3 text-slate-600 whitespace-nowrap">{new Date(e.date + 'T12:00:00').toLocaleDateString('nl-NL')}</td>
-              <td className="py-2 pr-3 text-slate-800 font-medium">
-                <span className="block truncate">{e.client || e.description}</span>
-                {e.isForeignIncome && <span className="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">🌍 buitenland</span>}
+              <td className="py-2 pr-4 text-slate-500 text-xs font-mono whitespace-nowrap">{e.invoiceNumber ?? '—'}</td>
+              <td className="py-2 pr-4 text-slate-600 whitespace-nowrap">{new Date(e.date + 'T12:00:00').toLocaleDateString('nl-NL')}</td>
+              <td className="py-2 pr-4 text-slate-800 font-medium">
+                {e.client || e.description}
+                {e.isForeignIncome && <span className="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">🌍 buitenland</span>}
               </td>
-              <td className="py-2 pr-3 text-right text-green-700 font-semibold tabular-nums whitespace-nowrap">
+              <td className="py-2 pr-4 text-right text-green-700 font-semibold tabular-nums whitespace-nowrap">
                 € {e.amount.amountExcludingVAT.toFixed(2)}
               </td>
-              <td className="py-2 pr-3 text-right text-slate-500 whitespace-nowrap">
+              <td className="py-2 pr-4 text-right text-slate-500 whitespace-nowrap">
                 {e.amount.vatRate === 'performance' ? '9%' : e.amount.vatRate === 'standard' ? '21%' : '0%'}
               </td>
-              <td className="py-2 pr-3 text-right text-slate-800 font-semibold tabular-nums whitespace-nowrap">
+              <td className="py-2 pr-4 text-right text-slate-800 font-semibold tabular-nums whitespace-nowrap">
                 € {e.amount.amountIncludingVAT.toFixed(2)}
               </td>
               <td className="py-2 text-right whitespace-nowrap">
