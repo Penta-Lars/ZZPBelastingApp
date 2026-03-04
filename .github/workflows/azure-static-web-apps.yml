@@ -47,17 +47,32 @@ jobs:
           action: 'upload'
           app_location: '/'        # Vite build
           output_location: 'dist'  # Vite output
-          skip_api_build: 'true'   # API staat in eigen Function App
 
       # ── Deploy API naar standalone Azure Functions ───────────────────────
-      - name: Deploy API naar Azure Functions
-        uses: Azure/functions-action@v1
+      - name: Login naar Azure
+        uses: azure/login@v2
         with:
-          app-name: 'func-musici-belasting'
-          package: './api'
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-          scm-do-build-during-deployment: false
-          enable-oryx-build: false
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Maak deployment zip van API (alleen productie)
+        run: |
+          cd api
+          npm prune --omit=dev
+          zip -r ../api-deploy.zip . \
+            --exclude "*.ts" \
+            --exclude "__tests__/*" \
+            --exclude ".gitignore" \
+            --exclude "tsconfig*.json" \
+            --exclude "*.test.*" \
+            --exclude ".env*"
+
+      - name: Deploy API naar Azure Functions
+        run: |
+          az functionapp deploy \
+            --resource-group rg-musici-belasting-app \
+            --name func-musici-belasting \
+            --src-path api-deploy.zip \
+            --type zip
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
