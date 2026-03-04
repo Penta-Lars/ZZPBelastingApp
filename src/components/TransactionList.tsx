@@ -33,8 +33,8 @@ export const InvoiceList: React.FC<{ refresh?: number; onEdit?: (entry: GageEntr
       <table className="w-full text-sm" style={{ minWidth: '700px' }}>
         <thead>
           <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
-            <th className="text-left py-2 pr-4 whitespace-nowrap">Fact.nr</th>
             <th className="text-left py-2 pr-4 whitespace-nowrap">Datum</th>
+            <th className="text-left py-2 pr-4 whitespace-nowrap">Fact.nr</th>
             <th className="text-left py-2 pr-4">Opdrachtgever</th>
             <th className="text-right py-2 pr-4 whitespace-nowrap">Excl. BTW</th>
             <th className="text-right py-2 pr-4 whitespace-nowrap">BTW%</th>
@@ -45,8 +45,8 @@ export const InvoiceList: React.FC<{ refresh?: number; onEdit?: (entry: GageEntr
         <tbody>
           {data.map(e => (
             <tr key={e.id} className="border-b border-slate-100 hover:bg-slate-50">
-              <td className="py-2 pr-4 text-slate-500 text-xs font-mono whitespace-nowrap">{e.invoiceNumber ?? '—'}</td>
               <td className="py-2 pr-4 text-slate-600 whitespace-nowrap">{new Date(e.date + 'T12:00:00').toLocaleDateString('nl-NL')}</td>
+              <td className="py-2 pr-4 text-slate-500 text-xs font-mono whitespace-nowrap">{e.invoiceNumber ?? '—'}</td>
               <td className="py-2 pr-4 text-slate-800 font-medium">
                 {e.client || e.description}
                 {e.isForeignIncome && <span className="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">🌍 buitenland</span>}
