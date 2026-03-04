@@ -29,7 +29,7 @@ export const App: React.FC = () => {
       <main className="max-w-5xl mx-auto px-4 py-8">
         {/* ── Facturen ─────────────────────────────────────────────────── */}
         {tab === 'facturen' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="flex flex-col gap-8">
             <InvoiceForm
               onSaved={handleInvoiceSaved}
               editEntry={editEntry}
