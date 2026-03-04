@@ -62,6 +62,49 @@ export class AzureStorageExpenseRepository implements IExpenseRepository {
     return entry;
   }
 
+  async updateExpense(userId: string, expenseId: string, request: SaveExpenseRequest): Promise<ExpenseEntry> {
+    await this.ensureContainer();
+    const containerClient = this.blobServiceClient.getContainerClient(this.containerName);
+    const blobName = `${userId}/${expenseId}.json`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    let createdAt = new Date().toISOString();
+    try {
+      const existing = await blockBlobClient.download();
+      const text = await streamToString(existing.readableStreamBody!);
+      createdAt = (JSON.parse(text) as ExpenseEntry).createdAt ?? createdAt;
+    } catch { /* nieuw object */ }
+
+    let vatRate = 0;
+    if (request.vatRateOnExpense === 'performance') vatRate = DUTCH_MUSICIAN_VAT_RATES.performanceVATRate;
+    else if (request.vatRateOnExpense === 'standard') vatRate = DUTCH_MUSICIAN_VAT_RATES.standardVATRate;
+
+    const amountExcludingVAT = vatRate > 0
+      ? request.amountIncludingVAT / (1 + vatRate)
+      : request.amountIncludingVAT;
+    const vatAmount = request.amountIncludingVAT - amountExcludingVAT;
+
+    const entry: ExpenseEntry = {
+      id: expenseId,
+      userId,
+      date: request.date,
+      description: request.description,
+      category: request.category,
+      amountIncludingVAT: parseFloat(request.amountIncludingVAT.toFixed(2)),
+      amountExcludingVAT: parseFloat(amountExcludingVAT.toFixed(2)),
+      vatAmount:           parseFloat(vatAmount.toFixed(2)),
+      vatRateOnExpense:    request.vatRateOnExpense,
+      isDepreciableAsset:  request.isDepreciableAsset,
+      usefulLifeYears:     request.usefulLifeYears,
+      createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const content = JSON.stringify(entry);
+    await blockBlobClient.upload(content, Buffer.byteLength(content));
+    return entry;
+  }
+
   async getExpensesByUser(userId: string): Promise<ExpenseEntry[]> {
     await this.ensureContainer();
     const containerClient = this.blobServiceClient.getContainerClient(this.containerName);
