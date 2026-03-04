@@ -57,21 +57,21 @@ jobs:
       - name: Maak deployment zip van API
         run: |
           cd api
-          zip -r ../api-deploy.zip . \
+          zip -r $RUNNER_TEMP/api-deploy.zip . \
             --exclude "*.ts" \
             --exclude "__tests__/*" \
             --exclude ".gitignore" \
             --exclude "tsconfig*.json" \
             --exclude "*.test.js" \
             --exclude ".env*"
-          echo "Zip grootte: $(du -sh ../api-deploy.zip | cut -f1)"
+          echo "Zip grootte: $(du -sh $RUNNER_TEMP/api-deploy.zip | cut -f1)"
 
       - name: Deploy API naar Azure Functions
         run: |
           az functionapp deploy \
             --resource-group rg-musici-belasting-app \
             --name func-musici-belasting \
-            --src-path api-deploy.zip \
+            --src-path $RUNNER_TEMP/api-deploy.zip \
             --type zip
 
   close_pull_request:
