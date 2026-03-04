@@ -61,6 +61,8 @@ export interface GageEntry {
   id: string;
   userId: string;
   date: string;          // ISO 8601
+  invoiceNumber?: string; // Factuurnummer, bijv. 2025.01AE
+  client?: string;        // Opdrachtgever
   description: string;
   category: IncomeCategory;
   amount: GageAmount;
@@ -72,6 +74,8 @@ export interface GageEntry {
 
 export interface SaveGageEntryRequest {
   date: string;
+  invoiceNumber?: string;
+  client?: string;
   description: string;
   category: IncomeCategory;
   amountIncludingVAT: number;

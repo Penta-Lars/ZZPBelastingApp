@@ -38,13 +38,13 @@ export async function saveGageEntry(request: HttpRequest, context: InvocationCon
   }
 
   // Validate required fields
-  const { date, description, category, amountIncludingVAT, vatRate } = requestData;
-  if (!date || !description || !category || amountIncludingVAT === undefined || !vatRate) {
+  const { date, description, client, category, amountIncludingVAT, vatRate } = requestData;
+  if (!date || (!description && !client) || !category || amountIncludingVAT === undefined || !vatRate) {
     return {
       status: 400,
       body: JSON.stringify({
         success: false,
-        error: 'Missing required fields: date, description, category, amountIncludingVAT, vatRate',
+        error: 'Missing required fields: date, category, amountIncludingVAT, vatRate, and client or description',
       } as ApiResponse<null>),
     };
   }

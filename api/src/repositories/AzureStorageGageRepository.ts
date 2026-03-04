@@ -40,6 +40,8 @@ export class AzureStorageGageRepository implements IGageRepository {
       id: entryId,
       userId,
       date: entry.date,
+      invoiceNumber: entry.invoiceNumber,
+      client: entry.client,
       description: entry.description,
       category: entry.category,
       amount: {
@@ -61,6 +63,47 @@ export class AzureStorageGageRepository implements IGageRepository {
     await blockBlobClient.upload(content, Buffer.byteLength(content));
 
     return gageEntry;
+  }
+
+  async updateEntry(userId: string, entryId: string, entry: SaveGageEntryRequest): Promise<GageEntry> {
+    await this.ensureContainer();
+    const containerClient = this.blobServiceClient.getContainerClient(this.containerName);
+    const blobName = `${userId}/${entryId}.json`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    // Lees bestaand object om createdAt te bewaren
+    let createdAt = new Date().toISOString();
+    try {
+      const existing = await blockBlobClient.download();
+      const text = await streamToString(existing.readableStreamBody!);
+      createdAt = (JSON.parse(text) as GageEntry).createdAt ?? createdAt;
+    } catch { /* nieuw */ }
+
+    const vatRate = entry.vatRate === 'performance' ? 0.09 : entry.vatRate === 'standard' ? 0.21 : 0;
+    const amountExcludingVAT = vatRate > 0 ? entry.amountIncludingVAT / (1 + vatRate) : entry.amountIncludingVAT;
+    const vatAmount = entry.amountIncludingVAT - amountExcludingVAT;
+
+    const updated: GageEntry = {
+      id: entryId,
+      userId,
+      date: entry.date,
+      invoiceNumber: entry.invoiceNumber,
+      client: entry.client,
+      description: entry.description,
+      category: entry.category,
+      amount: {
+        amountIncludingVAT: entry.amountIncludingVAT,
+        amountExcludingVAT: parseFloat(amountExcludingVAT.toFixed(2)),
+        vatAmount: parseFloat(vatAmount.toFixed(2)),
+        vatRate: entry.vatRate,
+      },
+      isForeignIncome: entry.isForeignIncome ?? false,
+      createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+    const content = JSON.stringify(updated);
+    await blockBlobClient.upload(content, Buffer.byteLength(content));
+    return updated;
   }
 
   async getEntriesByQuarter(

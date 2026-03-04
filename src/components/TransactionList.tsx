@@ -1,18 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import type { GageEntry, ExpenseEntry } from '../types/gage.types';
 import { useApi } from '../hooks/useApi';
 
-// ─── Income list ──────────────────────────────────────────────────────────────
-export const InvoiceList: React.FC<{ refresh?: number }> = ({ refresh }) => {
+// ─── Invoice list ─────────────────────────────────────────────────────────────
+export const InvoiceList: React.FC<{ refresh?: number; onEdit?: (entry: GageEntry) => void }> = ({ refresh, onEdit }) => {
   const { data, loading, error, execute } = useApi<GageEntry[]>();
+  const deleteApi = useApi<unknown>();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     execute('/api/getGageEntries').catch(() => null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refresh]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (loading) return <p className="text-slate-500 text-sm py-4">Laden…</p>;
-  if (error)   return <p className="text-red-500 text-sm py-4">Fout: {error}</p>;
+  useEffect(() => { load(); }, [refresh, load]);
+
+  const handleDelete = async (entry: GageEntry) => {
+    const label = entry.invoiceNumber || entry.client || entry.description;
+    if (!confirm(`Factuur "${label}" verwijderen?`)) return;
+    setDeletingId(entry.id);
+    await deleteApi.execute(`/api/deleteGageEntry?id=${entry.id}`, { method: 'DELETE' });
+    setDeletingId(null);
+    load();
+  };
+
+  if (loading && !data) return <p className="text-slate-500 text-sm py-4">Laden…</p>;
+  if (error)             return <p className="text-red-500 text-sm py-4">Fout: {error}</p>;
   if (!data || data.length === 0) return <p className="text-slate-400 text-sm py-4">Nog geen facturen ingevoerd.</p>;
 
   return (
@@ -20,32 +33,42 @@ export const InvoiceList: React.FC<{ refresh?: number }> = ({ refresh }) => {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 text-xs text-slate-500 uppercase tracking-wide">
-            <th className="text-left py-2 pr-4">Datum</th>
-            <th className="text-left py-2 pr-4">Omschrijving</th>
-            <th className="text-left py-2 pr-4">Categorie</th>
-            <th className="text-right py-2 pr-4">Excl. BTW</th>
-            <th className="text-right py-2 pr-4">BTW %</th>
-            <th className="text-right py-2">Incl. BTW</th>
+            <th className="text-left py-2 pr-2">Fact.nr</th>
+            <th className="text-left py-2 pr-2">Datum</th>
+            <th className="text-left py-2 pr-2">Opdrachtgever</th>
+            <th className="text-right py-2 pr-2">Excl. BTW</th>
+            <th className="text-right py-2 pr-2">BTW%</th>
+            <th className="text-right py-2 pr-2">Incl. BTW</th>
+            <th className="py-2"></th>
           </tr>
         </thead>
         <tbody>
           {data.map(e => (
             <tr key={e.id} className="border-b border-slate-100 hover:bg-slate-50">
-              <td className="py-2 pr-4 text-slate-600">{new Date(e.date).toLocaleDateString('nl-NL')}</td>
-              <td className="py-2 pr-4 text-slate-800 font-medium">{e.description}</td>
-              <td className="py-2 pr-4">
-                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
-                  {e.category}
-                </span>
+              <td className="py-2 pr-2 text-slate-500 text-xs font-mono">{e.invoiceNumber ?? '—'}</td>
+              <td className="py-2 pr-2 text-slate-600 whitespace-nowrap">{new Date(e.date + 'T12:00:00').toLocaleDateString('nl-NL')}</td>
+              <td className="py-2 pr-2 text-slate-800 font-medium">
+                {e.client || e.description}
+                {e.isForeignIncome && <span className="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded">🌍 buitenland</span>}
               </td>
-              <td className="py-2 pr-4 text-right text-green-700 font-semibold">
+              <td className="py-2 pr-2 text-right text-green-700 font-semibold tabular-nums">
                 € {e.amount.amountExcludingVAT.toFixed(2)}
               </td>
-              <td className="py-2 pr-4 text-right text-slate-500">
+              <td className="py-2 pr-2 text-right text-slate-500">
                 {e.amount.vatRate === 'performance' ? '9%' : e.amount.vatRate === 'standard' ? '21%' : '0%'}
               </td>
-              <td className="py-2 text-right text-slate-800 font-semibold">
+              <td className="py-2 pr-2 text-right text-slate-800 font-semibold tabular-nums">
                 € {e.amount.amountIncludingVAT.toFixed(2)}
+              </td>
+              <td className="py-2 text-right whitespace-nowrap">
+                <button onClick={() => onEdit?.(e)}
+                  className="text-purple-500 hover:text-purple-700 text-xs px-2 py-1 rounded hover:bg-purple-50 mr-1">
+                  ✏️
+                </button>
+                <button onClick={() => handleDelete(e)} disabled={deletingId === e.id}
+                  className="text-red-400 hover:text-red-600 text-xs px-2 py-1 rounded hover:bg-red-50 disabled:opacity-40">
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}

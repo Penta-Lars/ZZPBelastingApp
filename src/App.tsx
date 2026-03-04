@@ -9,12 +9,18 @@ import {
   IBDashboard,
 } from './components';
 import type { AppTab } from './components';
+import type { GageEntry } from './types/gage.types';
 
 export const App: React.FC = () => {
   const [tab, setTab] = useState<AppTab>('facturen');
-  // Refresh counter: verhoogd na opslaan zodat lijsten herladen
   const [invoiceRefresh, setInvoiceRefresh] = useState(0);
   const [expenseRefresh, setExpenseRefresh] = useState(0);
+  const [editEntry, setEditEntry] = useState<GageEntry | undefined>();
+
+  const handleInvoiceSaved = () => {
+    setInvoiceRefresh(r => r + 1);
+    setEditEntry(undefined);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -24,10 +30,14 @@ export const App: React.FC = () => {
         {/* ── Facturen ─────────────────────────────────────────────────── */}
         {tab === 'facturen' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <InvoiceForm onSaved={() => setInvoiceRefresh(r => r + 1)} />
+            <InvoiceForm
+              onSaved={handleInvoiceSaved}
+              editEntry={editEntry}
+              onCancelEdit={() => setEditEntry(undefined)}
+            />
             <div className="bg-white rounded-2xl shadow-md p-6">
               <h2 className="text-lg font-bold text-slate-800 mb-4">📄 Ingevoerde Facturen</h2>
-              <InvoiceList refresh={invoiceRefresh} />
+              <InvoiceList refresh={invoiceRefresh} onEdit={entry => { setEditEntry(entry); }} />
             </div>
           </div>
         )}
