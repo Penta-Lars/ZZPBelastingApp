@@ -54,17 +54,17 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Maak deployment zip van API (alleen productie)
+      - name: Maak deployment zip van API
         run: |
           cd api
-          npm prune --omit=dev
           zip -r ../api-deploy.zip . \
             --exclude "*.ts" \
             --exclude "__tests__/*" \
             --exclude ".gitignore" \
             --exclude "tsconfig*.json" \
-            --exclude "*.test.*" \
+            --exclude "*.test.js" \
             --exclude ".env*"
+          echo "Zip grootte: $(du -sh ../api-deploy.zip | cut -f1)"
 
       - name: Deploy API naar Azure Functions
         run: |
